@@ -26,7 +26,6 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 import openpyxl
 from itertools import cycle
-import random
 
 # لیست User-Agentهای متنوع
 USER_AGENTS = [
