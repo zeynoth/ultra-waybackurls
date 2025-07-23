@@ -1,0 +1,60 @@
+name: CI Pipeline for ultrawayback
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Flake8 for code quality
+        run: |
+          pip install flake8
+          flake8 ultrawayback.py --max-line-length=120 --ignore=E402,W503
+
+      - name: Run unit tests
+        run: |
+          python -m unittest discover -s tests -v
+
+      - name: Run script with sample domain
+        env:
+          VT_API_KEY: ${{ secrets.VT_API_KEY }}
+        run: |
+          python ultrawayback.py python.org --threads 1 --pages 2 --delay 5.0 --output-dir results --cache-dir cache --db-path wayback.db
+        continue-on-error: true
+
+      - name: Upload results as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: scraper-results-${{ matrix.python-version }}
+          path: |
+            results/*
+            wayback.db
+            cache/*
+
+      - name: Check for errors in logs
+        run: |
+          if grep -i "ERROR" results/*.txt; then
+            echo "Errors found in logs"
+            exit 1
+          fi
