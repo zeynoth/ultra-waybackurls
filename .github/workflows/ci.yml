@@ -30,7 +30,7 @@ jobs:
       - name: Run Flake8 for code quality
         run: |
           pip install flake8
-          flake8 ultrawayback.py --max-line-length=120 --ignore=E402,W503
+          flake8 ultra-wayback.py --max-line-length=120 --ignore=E402,W503
 
       - name: Run unit tests
         run: |
@@ -40,7 +40,7 @@ jobs:
         env:
           VT_API_KEY: ${{ secrets.VT_API_KEY }}
         run: |
-          python ultrawayback.py python.org --threads 1 --pages 2 --delay 5.0 --output-dir results --cache-dir cache --db-path wayback.db
+          python ultra-wayback.py python.org --threads 1 --pages 2 --delay 5.0 --output-dir results --cache-dir cache --db-path wayback.db
         continue-on-error: true
 
       - name: Upload results as artifact
